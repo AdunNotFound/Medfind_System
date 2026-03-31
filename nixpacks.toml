@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python311", "gcc-unwrapped.lib"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "gunicorn medfind_backend:app"
