@@ -1,13 +1,3 @@
-"""
-MedFind Backend Server
-Flask API for drug search with ML-powered ranking
-
-UPDATED: Phonetic-as-Feature Implementation
-- 12-feature ML model
-- No phonetic filtering
-- Full database search
-"""
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -440,12 +430,15 @@ def get_drug_details(drug_name):
             'error': str(e)
         }), 500
 
+@app.route('/app')
+def serve_frontend():
+    return app.send_static_file('frontend.html')
+
 
 # ────────────────────────────────────────────────────────────────
 #  RUN SERVER
 # ────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    print("[*] Starting server on http://127.0.0.1:5000")
-    print("   Press Ctrl+C to stop\n")
-    app.run(debug=False, host='127.0.0.1', port=5000, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
