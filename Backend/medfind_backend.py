@@ -15,7 +15,7 @@ import requests
 # ────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'medfind-secret-key-2024'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'medfind-secret-key-2024')
 
 # Enable CORS for frontend
 CORS(app, resources={
