@@ -1,15 +1,3 @@
-"""
-ML Functions for MedFind Drug Lookup
-Contains all machine learning and search functions
-
-UPDATED: Phonetic-as-Feature Implementation
-- 12 features (was 9)
-- No phonetic filtering
-- Searches all 71,885 drugs
-
-FIXED: Score direction - HIGHER score = BETTER match (was inverted!)
-"""
-
 import pandas as pd
 import numpy as np
 from rapidfuzz.distance import Levenshtein, JaroWinkler, Jaro
@@ -35,8 +23,6 @@ def normalize(text):
 def extract_features(query_norm, term_norm, source):
     """
     Extract 12 features for ML model
-    
-    CRITICAL: Returns features in EXACT order expected by model
     """
     if not term_norm or not query_norm:
         return {
@@ -150,15 +136,7 @@ def get_edit_distance_ranking(query, lookup_df, top_k=5):
 
 
 def get_ml_ranking(query, lookup_df, model, top_k=5):
-    """
-    ML-based ranking using LightGBM model
-    NO phonetic filtering - phonetic matching is now a feature
     
-    CRITICAL: Features must be in EXACT order model was trained with
-    
-    FIX: HIGHER score = BETTER match (LightGBM LambdaRank convention)
-    FIX: Deduplicate results - only show one result per unique drug name
-    """
     q_norm = normalize(query)
     
     if not q_norm:
@@ -177,7 +155,7 @@ def get_ml_ranking(query, lookup_df, model, top_k=5):
         return pd.DataFrame(columns=['canonical', 'term', 'ml_score', 'ml_confidence'])
     
     # ════════════════════════════════════════════════════════════
-    # CRITICAL: Feature order MUST match training!
+    # Feature order match training
     # ════════════════════════════════════════════════════════════
     FEATURE_ORDER = [
         'lev_dist',
@@ -209,16 +187,12 @@ def get_ml_ranking(query, lookup_df, model, top_k=5):
     candidates = candidates.copy()
     candidates['ml_score'] = raw_scores
     
-    # ════════════════════════════════════════════════════════════
-    # FIX: HIGHER score = BETTER match
-    # ════════════════════════════════════════════════════════════
-    
     # Sort ALL candidates by score (descending - best first)
     candidates = candidates.sort_values('ml_score', ascending=False)
     
     # ════════════════════════════════════════════════════════════
     # DEDUPLICATION: Only keep first (best) result per drug name
-    # This ensures we show top_k UNIQUE drugs, not top_k rows
+    # This ensures to show top_k UNIQUE drugs, not top_k rows
     # ════════════════════════════════════════════════════════════
     seen_drugs = set()
     unique_results = []
