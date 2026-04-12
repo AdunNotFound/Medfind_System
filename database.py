@@ -1,7 +1,7 @@
-"""
-Database Functions for MedFind
-Handles user authentication and search logging
-"""
+
+#Database Functions for MedFind
+#Handles user authentication and search logging
+
 
 import sqlite3
 import hashlib
@@ -88,10 +88,10 @@ def create_user(username, password):
 
 
 def verify_user(username, password):
-    """
-    Verify user credentials
-    Returns True if credentials are correct, False otherwise
-    """
+   
+    #Verify user credentials
+    #Returns True if credentials are correct, False otherwise
+    
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -119,10 +119,10 @@ def verify_user(username, password):
 
 
 def get_user(username):
-    """
-    Get user information
-    Returns user dict or None
-    """
+    
+    #Get user information
+    #Returns user dict or None
+    
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -153,9 +153,9 @@ def get_user(username):
 # ────────────────────────────────────────────────────────────────
 
 def log_search(username, query, result, confidence):
-    """
-    Log a search query to the database
-    """
+    
+    #Log a search query to the database
+    
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -178,10 +178,10 @@ def log_search(username, query, result, confidence):
 
 
 def get_search_history(username, limit=10):
-    """
-    Get search history for a user
-    Returns list of searches (most recent first)
-    """
+    
+    #Get search history for a user
+    #Returns list of searches (most recent first)
+
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -216,10 +216,10 @@ def get_search_history(username, limit=10):
 
 
 def get_all_searches(limit=100):
-    """
-    Get all searches across all users (for admin/analytics)
-    Returns list of searches (most recent first)
-    """
+   
+    #Get all searches across all users (for admin/analytics)
+    #Returns list of searches (most recent first)
+    
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -258,7 +258,7 @@ def get_all_searches(limit=100):
 # ────────────────────────────────────────────────────────────────
 
 def clear_search_history(username):
-    """Clear search history for a user"""
+    #Clear search history for a user
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -281,7 +281,7 @@ def clear_search_history(username):
 
 
 def delete_user(username):
-    """Delete a user and their search history"""
+    #Delete a user and their search history
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -314,7 +314,7 @@ def delete_user(username):
 # ────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    """Initialize database and create default admin user"""
+    #Initialize database and create default admin user
     print("Initializing MedFind database...")
     
     init_db()
