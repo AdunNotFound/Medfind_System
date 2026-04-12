@@ -24,6 +24,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'user',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -56,7 +57,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_user(username, password):
+def create_user(username, password, role = 'user'):
     """
     Create a new user
     Returns True if successful, False if username exists
@@ -68,8 +69,8 @@ def create_user(username, password):
         password_hash = hash_password(password)
         
         cursor.execute(
-            'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-            (username, password_hash)
+            'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
+            (username, password_hash, role)
         )
         
         conn.commit()
@@ -90,32 +91,27 @@ def create_user(username, password):
 def verify_user(username, password):
     """
     Verify user credentials
-    Returns True if credentials are correct, False otherwise
+    Returns dict with username and role if correct, None otherwise
     """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
-        
         password_hash = hash_password(password)
-        
         cursor.execute(
-            'SELECT * FROM users WHERE username = ? AND password_hash = ?',
+            'SELECT username, role FROM users WHERE username = ? AND password_hash = ?',
             (username, password_hash)
         )
-        
         user = cursor.fetchone()
         conn.close()
-        
         if user:
-            print(f"✓ User authenticated: {username}")
-            return True
+            print(f"✓ User authenticated: {username} (role: {user[1]})")
+            return {'username': user[0], 'role': user[1]}
         else:
-            print(f"⚠️  Invalid credentials for: {username}")
-            return False
-            
+            print(f"⚠️ Invalid credentials for: {username}")
+            return None
     except Exception as e:
         print(f"❌ Error verifying user: {e}")
-        return False
+        return None
 
 
 def get_user(username):
@@ -320,9 +316,9 @@ if __name__ == '__main__':
     init_db()
     
     # Create default admin user
-    if create_user('admin', 'admin123'):
-        print("✓ Default admin user created (username: admin, password: admin123)")
+    if create_user('admin', 'admin123', role='admin'):
+        print("✓ Default admin user created (username: admin, password: admin123, role: admin)")
     else:
-        print("ℹ️  Admin user already exists")
+        print("ℹ️ Admin user already exists")
     
     print("\n✅ Database setup complete!")

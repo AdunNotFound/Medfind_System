@@ -3,7 +3,7 @@ from flask_cors import CORS
 import pandas as pd
 import pickle
 import os
-from database import init_db, create_user, verify_user, log_search
+from database import init_db, create_user, verify_user, log_search, get_all_searches
 from ml_functions import hybrid_ensemble_search_v2
 import jwt
 import datetime
@@ -139,6 +139,27 @@ def token_required(f):
     
     return decorated
 
+def admin_required(f):
+    """Decorator to require admin role"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            if data.get('role') != 'admin':
+                return jsonify({'error': 'Admin access required'}), 403
+            current_user = data['username']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+        return f(current_user, *args, **kwargs)
+    return decorated
+
 
 # ────────────────────────────────────────────────────────────────
 #  API ROUTES
@@ -197,16 +218,19 @@ def login():
             return jsonify({'error': 'Username and password required'}), 400
         
         # Verify credentials
-        if verify_user(username, password):
+        user = verify_user(username, password)
+        if user:
             # Generate JWT token (expires in 24 hours)
             token = jwt.encode({
-                'username': username,
+                'username': user['username'],
+                'role': user['role'],
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
             }, app.config['SECRET_KEY'], algorithm='HS256')
-            
+
             return jsonify({
                 'token': token,
-                'username': username,
+                'username': user['username'],
+                'role': user['role'],
                 'message': 'Login successful'
             }), 200
         else:
@@ -434,7 +458,17 @@ def get_drug_details(drug_name):
 def serve_frontend():
     return app.send_static_file('frontend.html')
 
-
+@app.route('/api/admin/searches', methods=['GET', 'OPTIONS'])
+@admin_required
+def admin_get_searches(current_user):
+    """Admin-only: view all search logs"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    try:
+        searches = get_all_searches(limit=100)
+        return jsonify({'searches': searches}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 # ────────────────────────────────────────────────────────────────
 #  RUN SERVER
 # ────────────────────────────────────────────────────────────────
