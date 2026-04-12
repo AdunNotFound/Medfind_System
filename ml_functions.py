@@ -227,17 +227,13 @@ def get_ml_ranking(query, lookup_df, model, top_k=5):
 
 
 def hybrid_ensemble_search_v2(query, lookup_df, model, strategy='confidence_weighted', top_k=5):
-    """
-    Hybrid ensemble: combines edit distance + ML ranking
     
-    Strategies:
-    - confidence_weighted: Average both confidences (default)
-    - max_confidence: Take maximum confidence
-    - conservative: Take minimum confidence
+    #Hybrid ensemble combines edit distance + ML ranking
+    #Strategies:
+       # - confidence_weighted: Average both confidences (default)
+       # - max_confidence: Take maximum confidence
+       # - conservative: Take minimum confidence
     
-    NOTE: Both edit_distance and ML rankings are already deduplicated,
-    so this function just merges them and sorts by ensemble score.
-    """
     # Get results from both methods (already deduplicated)
     edit_results = get_edit_distance_ranking(query, lookup_df, top_k=top_k)
     ml_results = get_ml_ranking(query, lookup_df, model, top_k=top_k)
@@ -298,7 +294,6 @@ def hybrid_ensemble_search_v2(query, lookup_df, model, strategy='confidence_weig
     
     # ════════════════════════════════════════════════════════════
     # DEDUPLICATION: Ensure unique drug names in final output
-    # (Should already be unique from sub-functions, but double-check)
     # ════════════════════════════════════════════════════════════
     merged = merged.drop_duplicates(subset=['canonical'], keep='first')
     
