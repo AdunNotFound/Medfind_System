@@ -3,7 +3,7 @@ from flask_cors import CORS
 import pandas as pd
 import pickle
 import os
-from database import init_db, create_user, verify_user, log_search
+from database import init_db, create_user, verify_user, log_search, get_all_searches
 from ml_functions import hybrid_ensemble_search_v2
 import jwt
 import datetime
