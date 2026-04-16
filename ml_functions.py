@@ -21,9 +21,9 @@ def normalize(text):
 
 
 def extract_features(query_norm, term_norm, source):
-    """
-    Extract 12 features for ML model
-    """
+    #
+    #Extract 12 features for ML model
+    #
     if not term_norm or not query_norm:
         return {
             'lev_dist': 999,
@@ -80,11 +80,11 @@ def extract_features(query_norm, term_norm, source):
 # ────────────────────────────────────────────────────────────────
 
 def get_edit_distance_ranking(query, lookup_df, top_k=5):
-    """
-    Pure edit distance ranking
-    NO phonetic filtering - searches all drugs
-    DEDUPLICATION: Only returns one result per unique drug name
-    """
+    
+    #Pure edit distance ranking
+    #NO phonetic filtering - searches all drugs
+    #DEDUPLICATION: Only returns one result per unique drug name
+
     q_norm = normalize(query)
     
     if not q_norm:
