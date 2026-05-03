@@ -58,7 +58,7 @@ def extract_features(query_norm, term_norm, source):
     # Combined phonetic score
     phonetic_score = (soundex_match + metaphone_match + nysiis_match + match_rating) / 4.0
     
-    # Return in EXACT order (important for model!)
+    # Return in EXACT order
     return {
         'lev_dist': lev_d,
         'lev_norm': lev_d / max_len if max_len > 0 else 0.0,
